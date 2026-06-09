@@ -14,6 +14,7 @@ import 'package:positive_metering/model/happy_call_model.dart';
 import 'package:positive_metering/model/industry_model.dart';
 import 'package:positive_metering/model/login_model.dart';
 import 'package:positive_metering/model/product_model.dart';
+import 'package:positive_metering/model/project_contractor_model.dart';
 import 'package:positive_metering/model/project_detail_model.dart';
 import 'package:positive_metering/model/project_followup_model.dart';
 import 'package:positive_metering/model/project_model.dart';
@@ -1123,82 +1124,117 @@ class ApiService {
   }
 
   static Future<List<ProjectFollowUpModel>> getProjectFollowUp({
-  required String usersrno,
-  required String fromDate,
-  required String toDate,
-}) async {
-  final res = await _postRequest(
-    "https://digitalspaceinc.com/positive_metering/ws/getProjectFollowup.php",
-    {
-      "usersrno": usersrno,
-      "from_date": fromDate,
-      "to_date": toDate,
-    },
-  );
+    required String usersrno,
+    required String fromDate,
+    required String toDate,
+  }) async {
+    final res = await _postRequest(
+      "https://digitalspaceinc.com/positive_metering/ws/getProjectFollowup.php",
+      {"usersrno": usersrno, "from_date": fromDate, "to_date": toDate},
+    );
 
-  if (res["status"] == 0 && res["data"] != null) {
-    return (res["data"] as List)
-        .map((e) => ProjectFollowUpModel.fromJson(e))
-        .toList();
+    if (res["status"] == 0 && res["data"] != null) {
+      return (res["data"] as List)
+          .map((e) => ProjectFollowUpModel.fromJson(e))
+          .toList();
+    }
+
+    return [];
   }
 
-  return [];
-}
-static Future<bool> addProjectFollowup({
-  required String projectSrNo,
-  required String userSrNo,
-  required String comments,
-  required String projectFollowupDate,
-  required String statusSrNo,
-  required String nextFollowup,
-}) async {
-  final res = await _postRequest(
-    "https://digitalspaceinc.com/positive_metering/ws/addProjectFollowup.php",
-    {
-      "project_srno": projectSrNo,
-      "usersrno": userSrNo,
-      "comments": comments,
-      "project_followup_date": projectFollowupDate,
-      "status_srno": statusSrNo,
-      "next_followup": nextFollowup,
-    },
-  );
+  static Future<bool> addProjectFollowup({
+    required String projectSrNo,
+    required String userSrNo,
+    required String comments,
+    required String projectFollowupDate,
+    required String statusSrNo,
+    required String nextFollowup,
+  }) async {
+    final res = await _postRequest(
+      "https://digitalspaceinc.com/positive_metering/ws/addProjectFollowup.php",
+      {
+        "project_srno": projectSrNo,
+        "usersrno": userSrNo,
+        "comments": comments,
+        "project_followup_date": projectFollowupDate,
+        "status_srno": statusSrNo,
+        "next_followup": nextFollowup,
+      },
+    );
 
-  return res["status"] == 0;
-}
-
-static Future<List<Map<String, dynamic>>> getProjectFollowupDetails({
-  required String projectSrNo,
-}) async {
-  final res = await _postRequest(
-    "https://digitalspaceinc.com/positive_metering/ws/getProjectFollowupDetails.php",
-    {
-      "project_srno": projectSrNo,
-    },
-  );
-
-  if (res["status"] == 0 && res["data"] != null) {
-    return List<Map<String, dynamic>>.from(res["data"]);
+    return res["status"] == 0;
   }
 
-  return [];
-}
-static Future<ProjectDetailModel?> getProjectDetail({
-  required String projectSrNo,
-}) async {
-  final res = await _postRequest(
-    "https://digitalspaceinc.com/positive_metering/ws/getProjectDetail.php",
-    {
-      "project_srno": projectSrNo,
-    },
-  );
+  static Future<List<Map<String, dynamic>>> getProjectFollowupDetails({
+    required String projectSrNo,
+  }) async {
+    final res = await _postRequest(
+      "https://digitalspaceinc.com/positive_metering/ws/getProjectFollowupDetails.php",
+      {"project_srno": projectSrNo},
+    );
 
-  if (res["status"] == 0 &&
-      res["data"] != null &&
-      (res["data"] as List).isNotEmpty) {
-    return ProjectDetailModel.fromJson(res["data"][0]);
+    if (res["status"] == 0 && res["data"] != null) {
+      return List<Map<String, dynamic>>.from(res["data"]);
+    }
+
+    return [];
   }
 
-  return null;
-}
+  static Future<ProjectDetailModel?> getProjectDetail({
+    required String projectSrNo,
+  }) async {
+    final res = await _postRequest(
+      "https://digitalspaceinc.com/positive_metering/ws/getProjectDetail.php",
+      {"project_srno": projectSrNo},
+    );
+
+    if (res["status"] == 0 &&
+        res["data"] != null &&
+        (res["data"] as List).isNotEmpty) {
+      return ProjectDetailModel.fromJson(res["data"][0]);
+    }
+
+    return null;
+  }
+
+  static Future<List<ProjectContractorModel>> getProjectContractors({
+    required String userSrNo,
+    required String projectSrNo,
+  }) async {
+    final res = await _postRequest(
+      "https://digitalspaceinc.com/positive_metering/ws/getprojectcontractors.php",
+      {"usersrno": userSrNo, "project_srno": projectSrNo},
+    );
+
+    if (res["status"] == 0 && res["data"] != null) {
+      return (res["data"] as List)
+          .map((e) => ProjectContractorModel.fromJson(e))
+          .toList();
+    }
+
+    return [];
+  }
+
+  static Future<bool> addProjectContractor({
+    required String userSrNo,
+    required String projectSrNo,
+    required String name,
+    required String email,
+    required String mobile,
+    required String address,
+  }) async {
+    final res = await _postRequest(
+      "https://digitalspaceinc.com/positive_metering/ws/addprojectcontractors.php",
+      {
+        "usersrno": userSrNo,
+        "project_srno": projectSrNo,
+        "name": name,
+        "email": email,
+        "mobile": mobile,
+        "address": address,
+      },
+    );
+
+    return res["status"] == 0;
+  }
 }

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:positive_metering/api/api_service.dart';
+import 'package:positive_metering/shared_pref/app_pref.dart';
 import 'package:positive_metering/utils/app_colors.dart';
 import 'package:positive_metering/utils/widgets/common_app_bar.dart';
 
 class AddBidderScreen extends StatefulWidget {
-  const AddBidderScreen({super.key});
+  final String projectSrNo;
+  const AddBidderScreen({super.key, required this.projectSrNo});
 
   @override
   State<AddBidderScreen> createState() => _AddBidderScreenState();
@@ -12,6 +15,7 @@ class AddBidderScreen extends StatefulWidget {
 
 class _AddBidderScreenState extends State<AddBidderScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool isSaving = false;
 
   final TextEditingController bidderNameCtrl = TextEditingController();
   final TextEditingController mobileCtrl = TextEditingController();
@@ -101,38 +105,88 @@ class _AddBidderScreenState extends State<AddBidderScreen> {
                         children: [
                           Expanded(
                             child: InkWell(
-                              onTap: () {
-                                if (!_formKey.currentState!.validate()) {
-                                  return;
-                                }
+                              onTap: isSaving
+                                  ? null
+                                  : () async {
+                                      if (!_formKey.currentState!.validate()) {
+                                        return;
+                                      }
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    backgroundColor: AppColor.green,
-                                    content: Text(
-                                      "Bidder Added Successfully",
-                                      style: TextStyle(color: Colors.white),
+                                      setState(() => isSaving = true);
+
+                                      final userSrNo =
+                                          await AppPref.getUserSrNo();
+
+                                      final success =
+                                          await ApiService.addProjectContractor(
+                                            userSrNo: userSrNo ?? "",
+                                            projectSrNo: widget.projectSrNo,
+                                            name: bidderNameCtrl.text.trim(),
+                                            email: emailCtrl.text.trim(),
+                                            mobile: mobileCtrl.text.trim(),
+                                            address: addressCtrl.text.trim(),
+                                          );
+
+                                      setState(() => isSaving = false);
+
+                                      if (success) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            backgroundColor: Colors.green,
+                                            content: Text(
+                                              "Bidder Added Successfully",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+
+                                        Navigator.pop(context, true);
+                                      } else {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            backgroundColor: Colors.red,
+                                            content: Text(
+                                              "Failed To Add Bidder",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                              child: isSaving
+                                  ? SizedBox(
+                                      height: 20.h,
+                                      width: 20.h,
+                                      child: const CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Container(
+                                      height: 46.h,
+                                      decoration: BoxDecoration(
+                                        color: AppColor.primaryRed,
+                                        borderRadius: BorderRadius.circular(
+                                          8.r,
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        "Save",
+                                        style: TextStyle(
+                                          color: AppColor.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                );
-
-                                Navigator.pop(context);
-                              },
-                              child: Container(
-                                height: 46.h,
-                                decoration: BoxDecoration(
-                                  color: AppColor.primaryRed,
-                                  borderRadius: BorderRadius.circular(8.r),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "Save",
-                                  style: TextStyle(
-                                    color: AppColor.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
                             ),
                           ),
 
